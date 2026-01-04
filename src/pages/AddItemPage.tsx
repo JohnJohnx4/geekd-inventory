@@ -151,14 +151,6 @@ export default function AddItemPage({ onBack }: Props) {
     <>
       <AppBar position="sticky" elevation={1}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onBack}
-            aria-label="back"
-          >
-            <ArrowBackIcon />
-          </IconButton>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Add Item
           </Typography>

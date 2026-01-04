@@ -10,40 +10,51 @@ import {
   Toolbar,
   Typography,
   Divider,
+  Button,
 } from "@mui/material";
-import { useItems } from "../lib/useItems";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
-export default function InventoryPage() {
+import { useItems } from "../lib/useItems";
+import type { InventoryItem } from "../lib/types";
+
+interface Props {
+  onEditItem?: (item: InventoryItem) => void;
+}
+
+export default function InventoryPage({ onEditItem }: Props) {
   const { items, loading } = useItems();
 
   const summary = useMemo(() => {
     const total = items.length;
-    const lowAtBar = items.filter((i) => i.barQty <= i.barMin).length;
-    const lowBackstock = items.filter(
-      (i) => i.barQty + i.storageQty <= i.backstockMin
+    const noBarStock = items.filter((i) => i.barQty === 0).length;
+    const lowStorage = items.filter(
+      (i) => i.storageQty <= i.backstockMin
     ).length;
-    return { total, lowAtBar, lowBackstock };
+
+    return { total, noBarStock, lowStorage };
   }, [items]);
 
   return (
     <>
       <AppBar position="sticky" elevation={1}>
         <Toolbar>
-          <Typography variant="h6">Inventory</Typography>
+          <Typography variant="h6">Inventory Status</Typography>
         </Toolbar>
       </AppBar>
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
-        {/* Summary chips */}
+        {/* Summary */}
         <Stack direction="row" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap">
           <Chip label={`${summary.total} items`} />
           <Chip
-            label={`${summary.lowAtBar} low at bar`}
-            color={summary.lowAtBar > 0 ? "warning" : "default"}
+            label={`${summary.noBarStock} missing at bar`}
+            color={summary.noBarStock > 0 ? "error" : "default"}
           />
           <Chip
-            label={`${summary.lowBackstock} backstock low`}
-            color={summary.lowBackstock > 0 ? "error" : "default"}
+            label={`${summary.lowStorage} storage low`}
+            color={summary.lowStorage > 0 ? "warning" : "default"}
           />
         </Stack>
 
@@ -54,21 +65,14 @@ export default function InventoryPage() {
         ) : (
           <Stack spacing={1.25}>
             {items.map((item) => {
-              const totalQty = item.barQty + item.storageQty;
-              const lowAtBar = item.barQty <= item.barMin;
-              const lowBackstock = totalQty <= item.backstockMin;
-
-              const statusChip = lowBackstock ? (
-                <Chip size="small" color="error" label="Backstock low" />
-              ) : lowAtBar ? (
-                <Chip size="small" color="warning" label="Low at bar" />
-              ) : (
-                <Chip size="small" label="OK" />
-              );
+              const hasBarStock = item.barQty > 0;
+              const barLow = item.barQty > 0 && item.barQty <= 1;
+              const storageLow = item.storageQty <= item.backstockMin;
 
               return (
                 <Paper key={item.id} variant="outlined" sx={{ p: 1.5 }}>
                   <Stack spacing={1}>
+                    {/* Header */}
                     <Stack
                       direction="row"
                       alignItems="center"
@@ -78,46 +82,36 @@ export default function InventoryPage() {
                         <Typography fontWeight={800}>{item.name}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {item.category}
-                          {item.storageLocation
-                            ? ` • Storage: ${item.storageLocation}`
-                            : ""}
                         </Typography>
+                        <Button size="small" onClick={() => onEditItem?.(item)}>
+                          Edit
+                        </Button>
                       </Box>
-                      {statusChip}
+
+                      {/* Bar status */}
+                      <Stack direction="row" spacing={0.75} alignItems="center">
+                        {hasBarStock ? (
+                          <CheckCircleIcon color="success" />
+                        ) : (
+                          <CancelIcon color="error" />
+                        )}
+                        {barLow && (
+                          <WarningAmberIcon fontSize="small" color="warning" />
+                        )}
+                      </Stack>
                     </Stack>
 
                     <Divider />
 
+                    {/* Storage info */}
                     <Stack direction="row" spacing={1} flexWrap="wrap">
-                      <Chip label={`Bar: ${item.barQty}`} />
-                      <Chip label={`Storage: ${item.storageQty}`} />
-                      <Chip label={`Total: ${totalQty}`} />
-                      {typeof item.fridgeSpace === "number" && (
-                        <Chip label={`Fridge: ${item.fridgeSpace}`} />
-                      )}
-                      {typeof item.stockUnderBar === "boolean" && (
-                        <Chip
-                          label={
-                            item.stockUnderBar ? "Under bar" : "Not under bar"
-                          }
-                        />
-                      )}
+                      <Chip
+                        label={`Storage: ${item.storageQty}`}
+                        color={storageLow ? "warning" : "default"}
+                      />
+                      <Chip label={`Min: ${item.backstockMin}`} />
+                      <Chip label={`Max: ${item.backstockMax}`} />
                     </Stack>
-
-                    <Typography variant="caption" color="text.secondary">
-                      Bar min: {item.barMin} • Min: {item.backstockMin} • Max:{" "}
-                      {item.backstockMax}
-                      {item.vendor ? ` • Vendor: ${item.vendor}` : ""}
-                      {item.orderMultiple
-                        ? ` • Case: ${item.orderMultiple}`
-                        : ""}
-                    </Typography>
-
-                    {item.notes ? (
-                      <Typography variant="caption" color="text.secondary">
-                        Notes: {item.notes}
-                      </Typography>
-                    ) : null}
                   </Stack>
                 </Paper>
               );

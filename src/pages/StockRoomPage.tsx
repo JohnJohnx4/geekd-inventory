@@ -101,17 +101,8 @@ export default function BarRunPage({ onBack }: Props) {
     <>
       <AppBar position="sticky" elevation={1}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onBack}
-            aria-label="back"
-          >
-            <ArrowBackIcon />
-          </IconButton>
-
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Bar Run
+            Restock 115 Storage
           </Typography>
 
           <Chip
