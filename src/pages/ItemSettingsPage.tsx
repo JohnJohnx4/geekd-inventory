@@ -14,7 +14,6 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { db } from "../lib/db";
 import type { InventoryItem, Category } from "../lib/types";
 

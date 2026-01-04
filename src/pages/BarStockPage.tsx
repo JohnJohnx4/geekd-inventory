@@ -14,11 +14,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useItems } from "../lib/useItems";
 
-interface Props {
-  onBack?: () => void;
-}
-
-export default function BarRestockPage({ onBack }: Props) {
+export default function BarRestockPage() {
   const { items, moveToBar, returnToStorage, removeFromBar } = useItems();
 
   return (

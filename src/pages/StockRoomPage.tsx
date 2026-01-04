@@ -18,7 +18,6 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ReplayIcon from "@mui/icons-material/Replay";
@@ -27,16 +26,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import type { InventoryItem } from "../lib/types";
 
-type Props = {
-  onBack?: () => void;
-};
-
 function clampInt(n: number) {
   if (!Number.isFinite(n)) return 0;
   return Math.max(0, Math.floor(n));
 }
 
-export default function BarRunPage({ onBack }: Props) {
+export default function BarRunPage() {
   const items = useLiveQuery(
     () => db.items.where("category").equals("Concessions").sortBy("name"),
     [],
