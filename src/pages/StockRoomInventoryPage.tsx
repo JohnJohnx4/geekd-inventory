@@ -26,15 +26,23 @@ export default function StockRoomPage() {
   );
 
   const [category, setCategory] = useState<string>("All");
+  const [itemType, setItemType] = useState<string>("All");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
+  const itemTypes = useMemo(() => {
+    const set = new Set(items.map((i) => i.itemType));
+    return ["All", ...Array.from(set).sort()];
+  }, [items]);
+
   const visibleItems = useMemo(() => {
     return items.filter((i) => {
       if (category !== "All" && i.category !== category) return false;
+      if (itemType !== "All" && itemType && i.itemType !== itemType)
+        return false;
       return true;
     });
   }, [items, category]);
@@ -61,6 +69,19 @@ export default function StockRoomPage() {
               color={category === cat ? "primary" : "default"}
               variant={category === cat ? "filled" : "outlined"}
               onClick={() => setCategory(cat)}
+              sx={{ flexShrink: 0 }}
+            />
+          ))}
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
+          {itemTypes.map((iType, i) => (
+            <Chip
+              key={iType + "keys" + i}
+              label={iType}
+              clickable
+              color={itemType === iType ? "primary" : "default"}
+              variant={itemType === iType ? "filled" : "outlined"}
+              onClick={() => setItemType(`${iType}`)}
               sx={{ flexShrink: 0 }}
             />
           ))}

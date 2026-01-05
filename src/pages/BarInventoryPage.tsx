@@ -31,7 +31,8 @@ export default function BarInventoryPage() {
     return items.filter((i) => {
       if (category !== "All" && i.category !== category) return false;
       if (itemType !== "All" && itemType && i.itemType !== itemType)
-        return true;
+        return false;
+      return true;
     });
   }, [items, category]);
 
