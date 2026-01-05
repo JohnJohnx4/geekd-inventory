@@ -1,6 +1,5 @@
 import { db } from "./db";
-import { nanoid } from "nanoid";
-import type { InventoryItem } from "./types";
+import type { Category, InventoryItem } from "./types";
 import { seedRows } from "./seedData";
 
 export async function seedIfEmpty() {
@@ -29,11 +28,10 @@ export async function seedIfEmpty() {
         : undefined;
 
     return {
-      id: nanoid(),
       updatedAt: now,
 
       ...row,
-
+      category: row.category as Category,
       barQty,
       storageQty,
       barMin,

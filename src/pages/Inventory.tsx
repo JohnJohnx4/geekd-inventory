@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   AppBar,
   Box,
@@ -12,6 +12,7 @@ import {
   Divider,
   Button,
 } from "@mui/material";
+
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -25,6 +26,21 @@ interface Props {
 
 export default function InventoryPage({ onEditItem }: Props) {
   const { items, loading } = useItems();
+
+  const [category, setCategory] = useState<string>("All");
+
+  const categories = useMemo(() => {
+    const set = new Set(items.map((i) => i.category));
+    console.log("Categories", set);
+    return ["All", ...Array.from(set).sort()];
+  }, [items]);
+
+  const visibleItems = useMemo(() => {
+    return items.filter((i) => {
+      if (category !== "All" && i.category !== category) return false;
+      return true;
+    });
+  }, [items, category]);
 
   const summary = useMemo(() => {
     const total = items.length;
@@ -43,6 +59,22 @@ export default function InventoryPage({ onEditItem }: Props) {
           <Typography variant="h6">Inventory Status</Typography>
         </Toolbar>
       </AppBar>
+
+      <Container maxWidth="sm" sx={{ py: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
+          {categories.map((cat) => (
+            <Chip
+              key={cat}
+              label={cat}
+              clickable
+              color={category === cat ? "primary" : "default"}
+              variant={category === cat ? "filled" : "outlined"}
+              onClick={() => setCategory(cat)}
+              sx={{ flexShrink: 0 }}
+            />
+          ))}
+        </Stack>
+      </Container>
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
         {/* Summary */}
@@ -64,7 +96,7 @@ export default function InventoryPage({ onEditItem }: Props) {
           <Typography color="text.secondary">No items yet.</Typography>
         ) : (
           <Stack spacing={1.25}>
-            {items.map((item) => {
+            {visibleItems.map((item) => {
               const hasBarStock = item.barQty > 0;
               const barLow = item.barQty > 0 && item.barQty <= 1;
               const storageLow = item.storageQty <= item.backstockMin;
@@ -79,13 +111,20 @@ export default function InventoryPage({ onEditItem }: Props) {
                       justifyContent="space-between"
                     >
                       <Box>
-                        <Typography fontWeight={800}>{item.name}</Typography>
+                        <Typography fontWeight={800}>
+                          {item.name}{" "}
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => onEditItem?.(item)}
+                          >
+                            Edit
+                          </Button>
+                        </Typography>
+
                         <Typography variant="caption" color="text.secondary">
                           {item.category}
                         </Typography>
-                        <Button size="small" onClick={() => onEditItem?.(item)}>
-                          Edit
-                        </Button>
                       </Box>
 
                       {/* Bar status */}

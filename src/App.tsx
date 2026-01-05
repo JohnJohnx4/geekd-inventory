@@ -41,22 +41,8 @@ export default function App() {
         />
       )}
 
-      {screen === "bar" && (
-        <BarRestockPage
-          onBack={() => {
-            setEditingItem(null);
-            setScreen("inventory");
-          }}
-        />
-      )}
-      {screen === "115" && (
-        <StockingModePage
-          onBack={() => {
-            setEditingItem(null);
-            setScreen("inventory");
-          }}
-        />
-      )}
+      {screen === "bar" && <BarRestockPage />}
+      {screen === "115" && <StockingModePage />}
       {screen === "settings" && editingItem && (
         <ItemSettingsPage
           item={editingItem}

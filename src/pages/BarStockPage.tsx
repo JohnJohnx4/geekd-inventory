@@ -9,13 +9,27 @@ import {
   Chip,
   Divider,
   Button,
-  IconButton,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useItems } from "../lib/useItems";
+import { useMemo, useState } from "react";
 
 export default function BarRestockPage() {
   const { items, moveToBar, returnToStorage, removeFromBar } = useItems();
+
+  const [category, setCategory] = useState<string>("All");
+
+  const categories = useMemo(() => {
+    const set = new Set(items.map((i) => i.category));
+    console.log("Categories", set);
+    return ["All", ...Array.from(set).sort()];
+  }, [items]);
+
+  const visibleItems = useMemo(() => {
+    return items.filter((i) => {
+      if (category !== "All" && i.category !== category) return false;
+      return true;
+    });
+  }, [items, category]);
 
   return (
     <>
@@ -25,9 +39,25 @@ export default function BarRestockPage() {
         </Toolbar>
       </AppBar>
 
+      <Container maxWidth="sm" sx={{ py: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
+          {categories.map((cat) => (
+            <Chip
+              key={cat}
+              label={cat}
+              clickable
+              color={category === cat ? "primary" : "default"}
+              variant={category === cat ? "filled" : "outlined"}
+              onClick={() => setCategory(cat)}
+              sx={{ flexShrink: 0 }}
+            />
+          ))}
+        </Stack>
+      </Container>
+
       <Container maxWidth="sm" sx={{ py: 2 }}>
         <Stack spacing={1.25}>
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const atBar = item.barQty > 0;
             const lowAtBar = atBar && item.barQty <= item.barMin;
             const totalQty = item.barQty + item.storageQty;

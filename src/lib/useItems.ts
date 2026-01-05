@@ -41,7 +41,6 @@ export function useItems() {
 
     await db.items.update(item.id, {
       barQty: item.barQty - qty,
-      storageQty: item.storageQty + qty,
       updatedAt: Date.now(),
     });
   };
