@@ -1,7 +1,5 @@
 import { useState } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Container,
   Stack,
@@ -15,7 +13,6 @@ import {
 } from "@mui/material";
 import { db } from "../lib/db";
 import type { InventoryItem, Category } from "../lib/types";
-import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 
 const categories: Category[] = ["Concessions", "Cleaning", "Work Supplies"];
 
@@ -60,21 +57,6 @@ export default function ItemSettingsPage({
 
   return (
     <>
-      <AppBar position="sticky" elevation={1}>
-        <Toolbar>
-          <Button
-            variant="contained"
-            sx={{
-              marginRight: "1px",
-            }}
-            onClick={onBack}
-          >
-            <ArrowLeftIcon />
-          </Button>
-          <Typography variant="h6">Item Settingsssss</Typography>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="sm" sx={{ py: 2 }}>
         <Stack spacing={2}>
           {/* Basic info */}

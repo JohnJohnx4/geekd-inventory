@@ -9,6 +9,7 @@ export type InventoryItem = {
   id: string;
   name: string;
   category: Category;
+  itemType?: string;
 
   barQty: number;
   storageQty: number;

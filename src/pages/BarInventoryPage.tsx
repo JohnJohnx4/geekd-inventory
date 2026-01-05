@@ -1,6 +1,4 @@
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Container,
   Stack,
@@ -17,37 +15,51 @@ export default function BarInventoryPage() {
   const { items, removeFromStorage, setStockedAtBar } = useItems();
 
   const [category, setCategory] = useState<string>("All");
+  const [itemType, setItemType] = useState<string>("All");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
+  const itemTypes = useMemo(() => {
+    const set = new Set(items.map((i) => i.itemType));
+    return ["All", ...Array.from(set).sort()];
+  }, [items]);
+
   const visibleItems = useMemo(() => {
     return items.filter((i) => {
       if (category !== "All" && i.category !== category) return false;
-      return true;
+      if (itemType !== "All" && itemType && i.itemType !== itemType)
+        return true;
     });
   }, [items, category]);
 
   return (
     <>
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h6">Bar Inventory</Typography>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="sm" sx={{ py: 1, mt: 2 }}>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {categories.map((cat) => (
+          {categories.map((cat, i) => (
             <Chip
-              key={cat}
+              key={cat + "keys" + i}
               label={cat}
               clickable
               color={category === cat ? "primary" : "default"}
               variant={category === cat ? "filled" : "outlined"}
               onClick={() => setCategory(cat)}
+              sx={{ flexShrink: 0 }}
+            />
+          ))}
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
+          {itemTypes.map((iType, i) => (
+            <Chip
+              key={iType + "keys" + i}
+              label={iType}
+              clickable
+              color={itemType === iType ? "primary" : "default"}
+              variant={itemType === iType ? "filled" : "outlined"}
+              onClick={() => setItemType(`${iType}`)}
               sx={{ flexShrink: 0 }}
             />
           ))}

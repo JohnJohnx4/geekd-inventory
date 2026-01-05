@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Container,
   Paper,
@@ -110,6 +108,7 @@ export default function AddItemPage({ onBack }: Props) {
         orderUnit: orderUnit.trim(),
         orderMultiple: toInt(orderMultiple) || 1,
         notes: notes.trim(),
+        itemType: "",
 
         updatedAt: now,
       };
@@ -147,23 +146,24 @@ export default function AddItemPage({ onBack }: Props) {
 
   return (
     <>
-      <AppBar position="sticky" elevation={1}>
+      {/* <AppBar position="sticky" elevation={1}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Add Item
           </Typography>
-          <Button
-            color="inherit"
-            startIcon={<SaveIcon />}
-            onClick={() => save(false)}
-            disabled={!canSave || saving}
-          >
-            Save
-          </Button>
+
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
+        <Button
+          color="inherit"
+          startIcon={<SaveIcon />}
+          onClick={() => save(false)}
+          disabled={!canSave || saving}
+        >
+          Save
+        </Button>
         <PageCard variant="outlined">
           <Stack spacing={2}>
             <TextField

@@ -4,12 +4,16 @@ import {
   BottomNavigationAction,
   Paper,
   Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
 } from "@mui/material";
 import InventoryIcon from "@mui/icons-material/Inventory2";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import BarIcon from "@mui/icons-material/LocalDrink";
-
-import AddIcon from "@mui/icons-material/Add";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import HanburgerIcon from "@mui/icons-material/Menu";
 
 import InventoryPage from "./pages/Inventory";
 import AddItemPage from "./pages/AddItemPage";
@@ -18,19 +22,64 @@ import { seedIfEmpty } from "./lib/seed";
 import type { InventoryItem } from "./lib/types";
 import ItemSettingsPage from "./pages/ItemSettingsPage";
 import BarRestockPage from "./pages/BarInventoryPage";
+import OptionsPage from "./pages/OptionsPage";
+import StaircasePrizingCalculator from "./pages/PrizingCalculator";
 
-type Screen = "inventory" | "115" | "bar" | "add" | "settings";
+export type AppScreen =
+  | "inventory"
+  | "115"
+  | "bar"
+  | "add"
+  | "settings"
+  | "prizing"
+  | "options";
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("bar");
+  const [screen, setScreen] = useState<AppScreen>("bar");
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     seedIfEmpty();
   }, []);
 
+  const getTitle = () => {
+    switch (screen) {
+      case "bar":
+        return "Bar Inventory";
+      case "115":
+        return "115 Inventory";
+      case "inventory":
+        return "Inventory Status";
+      case "settings":
+        return "Item Settings";
+      case "add":
+        return "";
+      default:
+        "Page";
+    }
+  };
+
   return (
     <Box sx={{ pb: 7 }}>
+      <AppBar position="sticky">
+        <Toolbar>
+          {screen === "settings" && (
+            <Button
+              variant="contained"
+              sx={{
+                marginRight: "1px",
+              }}
+              onClick={() => {
+                setEditingItem(null);
+                setScreen("inventory");
+              }}
+            >
+              <ArrowLeftIcon />
+            </Button>
+          )}
+          <Typography variant="h6">{getTitle()}</Typography>
+        </Toolbar>
+      </AppBar>
       {/* Main content */}
       {screen === "inventory" && (
         <InventoryPage
@@ -45,16 +94,18 @@ export default function App() {
       {screen === "115" && <StockingModePage />}
       {screen === "settings" && editingItem && (
         <ItemSettingsPage
-          item={editingItem}
           onBack={() => {
             setEditingItem(null);
             setScreen("inventory");
           }}
+          item={editingItem}
         />
       )}
+      {screen === "options" && <OptionsPage setScreen={setScreen} />}
       {screen === "add" && (
         <AddItemPage onBack={() => setScreen("inventory")} />
       )}
+      {screen === "prizing" && <StaircasePrizingCalculator />}
 
       {/* Bottom navigation */}
       <Paper
@@ -78,9 +129,9 @@ export default function App() {
             icon={<InventoryIcon />}
           />
           <BottomNavigationAction
-            label="Add Item"
-            value="add"
-            icon={<AddIcon />}
+            label="Other"
+            value="options"
+            icon={<HanburgerIcon />}
           />
         </BottomNavigation>
       </Paper>

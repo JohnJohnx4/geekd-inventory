@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Container,
   Stack,
@@ -53,17 +51,6 @@ export default function StockRoomPage() {
 
   return (
     <>
-      <AppBar position="sticky" elevation={1}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            115 Inventory
-          </Typography>
-          <Chip
-            label={`${items?.length ?? 0} items`}
-            sx={{ bgcolor: "white" }}
-          />
-        </Toolbar>
-      </AppBar>
       <Container maxWidth="sm" sx={{ py: 1, mt: 2 }}>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
           {categories.map((cat) => (

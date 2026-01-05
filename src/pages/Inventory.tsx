@@ -1,13 +1,11 @@
 // src/pages/InventoryPage.tsx
 import { useMemo, useState } from "react";
 import {
-  AppBar,
   Box,
   Chip,
   Container,
   Paper,
   Stack,
-  Toolbar,
   Typography,
   Divider,
   Button,
@@ -73,12 +71,6 @@ export default function InventoryPage({ onEditItem }: Props) {
 
   return (
     <>
-      <AppBar position="sticky" elevation={1}>
-        <Toolbar>
-          <Typography variant="h6">Inventory Status</Typography>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="sm" sx={{ py: 1 }}>
         <Button
           color="error"
