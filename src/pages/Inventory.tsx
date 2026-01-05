@@ -141,6 +141,10 @@ export default function InventoryPage({ onEditItem }: Props) {
                         <Typography variant="caption" color="text.secondary">
                           {item.category}
                         </Typography>
+
+                        <Typography variant="caption" color="text.secondary">
+                          {item.itemType}
+                        </Typography>
                       </Box>
 
                       {/* Bar status */}
