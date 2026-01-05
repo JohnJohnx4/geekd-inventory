@@ -74,17 +74,19 @@ export default function StockRoomPage() {
           ))}
         </Stack>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {itemTypes.map((iType, i) => (
-            <Chip
-              key={iType + "keys" + i}
-              label={iType}
-              clickable
-              color={itemType === iType ? "primary" : "default"}
-              variant={itemType === iType ? "filled" : "outlined"}
-              onClick={() => setItemType(`${iType}`)}
-              sx={{ flexShrink: 0 }}
-            />
-          ))}
+          {itemTypes
+            .filter((i) => !!i)
+            .map((iType, i) => (
+              <Chip
+                key={iType + "keys" + i}
+                label={iType}
+                clickable
+                color={itemType === iType ? "primary" : "default"}
+                variant={itemType === iType ? "filled" : "outlined"}
+                onClick={() => setItemType(`${iType}`)}
+                sx={{ flexShrink: 0 }}
+              />
+            ))}
         </Stack>
       </Container>
 
