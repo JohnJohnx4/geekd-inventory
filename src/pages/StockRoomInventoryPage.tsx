@@ -40,12 +40,23 @@ export default function StockRoomPage() {
 
   const visibleItems = useMemo(() => {
     return items.filter((i) => {
-      if (category !== "All" && i.category !== category) return false;
-      if (itemType !== "All" && itemType && i.itemType !== itemType)
+      // Category filter
+      if (category !== "All" && i.category !== category) {
         return false;
+      }
+
+      // Item type filter
+      if (itemType !== "All") {
+        if (itemType === "Uncategorized") {
+          return i.itemType == null || i.itemType === "";
+        }
+
+        return i.itemType === itemType;
+      }
+
       return true;
     });
-  }, [items, category]);
+  }, [items, category, itemType]);
 
   async function updateItem(id: string, patch: Partial<InventoryItem>) {
     await db.items.update(id, { ...patch, updatedAt: Date.now() });

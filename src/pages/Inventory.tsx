@@ -34,18 +34,37 @@ export default function InventoryPage({ onEditItem }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [category, setCategory] = useState<string>("All");
+  const [itemType, setItemType] = useState<string>("All");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
+  const itemTypes = useMemo(() => {
+    const set = new Set(items.map((i) => i.itemType));
+    return ["All", "Uncategorized", ...Array.from(set).sort()];
+  }, [items]);
+
   const visibleItems = useMemo(() => {
     return items.filter((i) => {
-      if (category !== "All" && i.category !== category) return false;
+      // Category filter
+      if (category !== "All" && i.category !== category) {
+        return false;
+      }
+
+      // Item type filter
+      if (itemType !== "All") {
+        if (itemType === "Uncategorized") {
+          return i.itemType == null || i.itemType === "";
+        }
+
+        return i.itemType === itemType;
+      }
+
       return true;
     });
-  }, [items, category]);
+  }, [items, category, itemType]);
 
   const summary = useMemo(() => {
     const total = items.length;
@@ -94,6 +113,21 @@ export default function InventoryPage({ onEditItem }: Props) {
             />
           ))}
         </Stack>
+        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
+          {itemTypes
+            .filter((i) => !!i)
+            .map((iType, i) => (
+              <Chip
+                key={iType + "keys" + i}
+                label={iType}
+                clickable
+                color={itemType === iType ? "primary" : "default"}
+                variant={itemType === iType ? "filled" : "outlined"}
+                onClick={() => setItemType(`${iType}`)}
+                sx={{ flexShrink: 0 }}
+              />
+            ))}
+        </Stack>
       </Container>
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
@@ -106,7 +140,7 @@ export default function InventoryPage({ onEditItem }: Props) {
           />
           <Chip
             label={`${summary.lowStorage} storage low`}
-            color={summary.lowStorage > 0 ? "warning" : "default"}
+            color={summary.lowStorage > 0 ? "error" : "default"}
           />
         </Stack>
 
@@ -138,9 +172,7 @@ export default function InventoryPage({ onEditItem }: Props) {
                           {item.name}
                         </Typography>
 
-                        <Typography variant="caption" color="text.secondary">
-                          {item.category}
-                        </Typography>
+                        <Chip label={item.category} />
 
                         <Typography variant="caption" color="text.secondary">
                           {item.itemType}
