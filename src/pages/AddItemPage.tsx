@@ -54,7 +54,7 @@ export default function AddItemPage({ onBack }: Props) {
 
   const [orderUnit, setOrderUnit] = useState("");
   const [orderMultiple, setOrderMultiple] = useState("1");
-  const [vendor, setVendor] = useState("");
+  const [notes, setNotes] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{
@@ -109,7 +109,7 @@ export default function AddItemPage({ onBack }: Props) {
 
         orderUnit: orderUnit.trim(),
         orderMultiple: toInt(orderMultiple) || 1,
-        vendor: vendor.trim(),
+        notes: notes.trim(),
 
         updatedAt: now,
       };
@@ -128,7 +128,7 @@ export default function AddItemPage({ onBack }: Props) {
         setBackstockMax("0");
         setOrderUnit("");
         setOrderMultiple("1");
-        setVendor("");
+        setNotes("");
         // keep focus on name on mobile
         // (autofocus below will handle on rerender)
       } else {
@@ -197,13 +197,6 @@ export default function AddItemPage({ onBack }: Props) {
             </Typography>
             <Stack direction="row" spacing={1}>
               <TextField
-                label="Bar qty"
-                type="number"
-                value={barQty}
-                onChange={(e) => setBarQty(e.target.value)}
-                fullWidth
-              />
-              <TextField
                 label="Storage qty"
                 type="number"
                 value={storageQty}
@@ -218,13 +211,6 @@ export default function AddItemPage({ onBack }: Props) {
               Thresholds
             </Typography>
             <Stack direction="row" spacing={1}>
-              <TextField
-                label="Bar min (low)"
-                type="number"
-                value={barMin}
-                onChange={(e) => setBarMin(e.target.value)}
-                fullWidth
-              />
               <TextField
                 label="Backstock min"
                 type="number"
@@ -248,35 +234,11 @@ export default function AddItemPage({ onBack }: Props) {
               error={toInt(backstockMax) < toInt(backstockMin)}
             />
 
-            <Divider />
-
-            <Typography variant="subtitle2" color="text.secondary">
-              Ordering (optional)
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <TextField
-                label="Order unit"
-                placeholder="case / box / each"
-                value={orderUnit}
-                onChange={(e) => setOrderUnit(e.target.value)}
-                fullWidth
-              />
-              <TextField
-                label="Order multiple"
-                type="number"
-                value={orderMultiple}
-                onChange={(e) => setOrderMultiple(e.target.value)}
-                fullWidth
-                helperText="e.g. 12 for a 12-pack"
-                error={toInt(orderMultiple) < 1}
-              />
-            </Stack>
-
             <TextField
               label="Vendor (optional)"
               placeholder="Costco, Sysco, Amazon..."
-              value={vendor}
-              onChange={(e) => setVendor(e.target.value)}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               fullWidth
             />
 

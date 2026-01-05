@@ -11,11 +11,18 @@ import {
   Typography,
   Divider,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { useItems } from "../lib/useItems";
 import type { InventoryItem } from "../lib/types";
@@ -25,13 +32,13 @@ interface Props {
 }
 
 export default function InventoryPage({ onEditItem }: Props) {
-  const { items, loading } = useItems();
-
+  const { items, loading, clearDatabase } = useItems();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [category, setCategory] = useState<string>("All");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
-    console.log("Categories", set);
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
@@ -44,13 +51,25 @@ export default function InventoryPage({ onEditItem }: Props) {
 
   const summary = useMemo(() => {
     const total = items.length;
-    const noBarStock = items.filter((i) => i.barQty === 0).length;
+    const noBarStock = items.filter(
+      (i) => i.category === "Concessions" && !i.stockAtBar
+    ).length;
     const lowStorage = items.filter(
       (i) => i.storageQty <= i.backstockMin
     ).length;
 
     return { total, noBarStock, lowStorage };
   }, [items]);
+
+  async function handleClearDatabase() {
+    try {
+      setClearing(true);
+      await clearDatabase();
+      setConfirmOpen(false);
+    } finally {
+      setClearing(false);
+    }
+  }
 
   return (
     <>
@@ -60,6 +79,15 @@ export default function InventoryPage({ onEditItem }: Props) {
         </Toolbar>
       </AppBar>
 
+      <Container maxWidth="sm" sx={{ py: 1 }}>
+        <Button
+          color="error"
+          variant="contained"
+          onClick={() => setConfirmOpen(true)}
+        >
+          Clear Inventory
+        </Button>
+      </Container>
       <Container maxWidth="sm" sx={{ py: 1 }}>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
           {categories.map((cat) => (
@@ -81,7 +109,7 @@ export default function InventoryPage({ onEditItem }: Props) {
         <Stack direction="row" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap">
           <Chip label={`${summary.total} items`} />
           <Chip
-            label={`${summary.noBarStock} missing at bar`}
+            label={`${summary.noBarStock} Not stocked at bar`}
             color={summary.noBarStock > 0 ? "error" : "default"}
           />
           <Chip
@@ -112,14 +140,10 @@ export default function InventoryPage({ onEditItem }: Props) {
                     >
                       <Box>
                         <Typography fontWeight={800}>
-                          {item.name}{" "}
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => onEditItem?.(item)}
-                          >
-                            Edit
-                          </Button>
+                          <IconButton onClick={() => onEditItem?.(item)}>
+                            <EditIcon />
+                          </IconButton>
+                          {item.name}
                         </Typography>
 
                         <Typography variant="caption" color="text.secondary">
@@ -157,6 +181,34 @@ export default function InventoryPage({ onEditItem }: Props) {
             })}
           </Stack>
         )}
+        <Dialog
+          open={confirmOpen}
+          onClose={() => !clearing && setConfirmOpen(false)}
+        >
+          <DialogTitle>Clear Inventory?</DialogTitle>
+
+          <DialogContent>
+            <DialogContentText>
+              This will permanently remove <strong>all inventory data</strong>{" "}
+              from this device. This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={() => setConfirmOpen(false)} disabled={clearing}>
+              Cancel
+            </Button>
+
+            <Button
+              color="error"
+              variant="contained"
+              onClick={handleClearDatabase}
+              disabled={clearing}
+            >
+              {clearing ? "Clearing…" : "Yes, Clear Everything"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );

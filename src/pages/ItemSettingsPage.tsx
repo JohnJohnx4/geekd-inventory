@@ -144,8 +144,8 @@ export default function ItemSettingsPage({
               <FormControlLabel
                 control={
                   <Switch
-                    checked={form.stockUnderBar ?? false}
-                    onChange={(e) => update("stockUnderBar", e.target.checked)}
+                    checked={form.stockAtBar ?? false}
+                    onChange={(e) => update("stockAtBar", e.target.checked)}
                   />
                 }
                 label="Stocked under bar"

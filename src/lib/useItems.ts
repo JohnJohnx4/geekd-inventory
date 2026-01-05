@@ -26,6 +26,13 @@ export function useItems() {
     });
   };
 
+  const setStockedAtBar = async (item: InventoryItem, stocked: boolean) => {
+    await db.items.update(item.id, {
+      stockAtBar: stocked,
+      updatedAt: Date.now(),
+    });
+  };
+
   const returnToStorage = async (item: InventoryItem, qty = 1) => {
     if (item.barQty < qty) return;
 
@@ -45,12 +52,28 @@ export function useItems() {
     });
   };
 
+  const removeFromStorage = async (item: InventoryItem, qty = 1) => {
+    if (item.storageQty < qty) return;
+
+    await db.items.update(item.id, {
+      storageQty: item.storageQty + qty,
+      updatedAt: Date.now(),
+    });
+  };
+
+  const clearDatabase = async () => {
+    await db.items.clear();
+  };
+
   return {
     items,
     loading: items === undefined,
     updateItem,
     moveToBar,
     returnToStorage,
+    setStockedAtBar,
     removeFromBar,
+    removeFromStorage,
+    clearDatabase,
   };
 }

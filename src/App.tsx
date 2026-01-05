@@ -13,11 +13,11 @@ import AddIcon from "@mui/icons-material/Add";
 
 import InventoryPage from "./pages/Inventory";
 import AddItemPage from "./pages/AddItemPage";
-import StockingModePage from "./pages/StockRoomPage";
+import StockingModePage from "./pages/StockRoomInventoryPage";
 import { seedIfEmpty } from "./lib/seed";
 import type { InventoryItem } from "./lib/types";
 import ItemSettingsPage from "./pages/ItemSettingsPage";
-import BarRestockPage from "./pages/BarStockPage";
+import BarRestockPage from "./pages/BarInventoryPage";
 
 type Screen = "inventory" | "115" | "bar" | "add" | "settings";
 

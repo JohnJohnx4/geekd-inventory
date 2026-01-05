@@ -13,14 +13,13 @@ import {
 import { useItems } from "../lib/useItems";
 import { useMemo, useState } from "react";
 
-export default function BarRestockPage() {
-  const { items, moveToBar, returnToStorage, removeFromBar } = useItems();
+export default function BarInventoryPage() {
+  const { items, removeFromStorage, setStockedAtBar } = useItems();
 
   const [category, setCategory] = useState<string>("All");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
-    console.log("Categories", set);
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
@@ -35,11 +34,11 @@ export default function BarRestockPage() {
     <>
       <AppBar position="sticky">
         <Toolbar>
-          <Typography variant="h6">Bar Restock</Typography>
+          <Typography variant="h6">Bar Inventory</Typography>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="sm" sx={{ py: 1 }}>
+      <Container maxWidth="sm" sx={{ py: 1, mt: 2 }}>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
           {categories.map((cat) => (
             <Chip
@@ -58,11 +57,6 @@ export default function BarRestockPage() {
       <Container maxWidth="sm" sx={{ py: 2 }}>
         <Stack spacing={1.25}>
           {visibleItems.map((item) => {
-            const atBar = item.barQty > 0;
-            const lowAtBar = atBar && item.barQty <= item.barMin;
-            const totalQty = item.barQty + item.storageQty;
-            const storageLow = totalQty <= item.backstockMin;
-
             return (
               <Paper key={item.id} variant="outlined" sx={{ p: 1.5 }}>
                 <Stack spacing={1}>
@@ -75,58 +69,47 @@ export default function BarRestockPage() {
                     <Box>
                       <Typography fontWeight={700}>{item.name}</Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Bar: {item.barQty} • Storage: {item.storageQty}
+                        Stock in 115: {item.storageQty}
                       </Typography>
                     </Box>
                   </Stack>
 
                   <Divider />
 
-                  {/* Status */}
-                  <Stack direction="row" spacing={1} flexWrap="wrap">
-                    <Chip
+                  {/* <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {/* <Chip
                       size="small"
                       color={atBar ? "success" : "error"}
                       label={atBar ? "At Bar" : "Not at Bar"}
-                    />
+                    /> 
 
-                    {lowAtBar && (
+                    {/* {lowAtBar && (
                       <Chip size="small" color="warning" label="Low at Bar" />
-                    )}
+                    )} 
 
-                    {storageLow && (
+                   {storageLow && (
                       <Chip size="small" color="error" label="Backstock Low" />
                     )}
-                  </Stack>
+                  </Stack> */}
 
                   {/* Actions */}
                   <Stack direction="row" spacing={1}>
                     <Button
                       size="small"
-                      color="secondary"
-                      disabled={item.barQty === 0}
-                      onClick={() => removeFromBar(item, 1)}
+                      color={item.stockAtBar ? "success" : "error"}
+                      variant={item.stockAtBar ? "outlined" : "contained"}
+                      onClick={() => setStockedAtBar(item, !item.stockAtBar)}
                     >
-                      Remove from Bar
-                    </Button>
-
-                    <Button
-                      size="small"
-                      color="secondary"
-                      variant="contained"
-                      disabled={item.barQty === 0}
-                      onClick={() => returnToStorage(item, 1)}
-                    >
-                      Bar to 115
+                      {item.stockAtBar ? "Stocked" : "Empty"}
                     </Button>
 
                     <Button
                       size="small"
                       variant="contained"
                       disabled={item.storageQty === 0}
-                      onClick={() => moveToBar(item, 1)}
+                      onClick={() => removeFromStorage(item, 1)}
                     >
-                      115 to Bar
+                      Take from 115
                     </Button>
                   </Stack>
                 </Stack>

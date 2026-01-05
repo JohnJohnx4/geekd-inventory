@@ -1,4 +1,9 @@
 export type Category = "Concessions" | "Cleaning" | "Work Supplies";
+export type StorageLocation =
+  | "Under Bar"
+  | "Bathroom Cabinet"
+  | "Bar Cabinet"
+  | "Register Cabinet";
 
 export type InventoryItem = {
   id: string;
@@ -18,7 +23,7 @@ export type InventoryItem = {
 
   // NEW (optional) so we keep your sheet data
   fridgeSpace?: number; // capacity / facing count
-  stockUnderBar?: boolean; // TRUE/FALSE from your sheet
+  stockAtBar?: boolean; // TRUE/FALSE from your sheet
   expiration?: string; // keep as string for now
   storageLocation?: string; // e.g. "115"
   notes?: string;

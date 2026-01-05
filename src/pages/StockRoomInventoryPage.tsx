@@ -31,7 +31,6 @@ export default function StockRoomPage() {
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
-    console.log("Categories", set);
     return ["All", ...Array.from(set).sort()];
   }, [items]);
 
@@ -57,7 +56,7 @@ export default function StockRoomPage() {
       <AppBar position="sticky" elevation={1}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Stock Room
+            115 Inventory
           </Typography>
           <Chip
             label={`${items?.length ?? 0} items`}
@@ -65,7 +64,7 @@ export default function StockRoomPage() {
           />
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm" sx={{ py: 1 }}>
+      <Container maxWidth="sm" sx={{ py: 1, mt: 2 }}>
         <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
           {categories.map((cat) => (
             <Chip
