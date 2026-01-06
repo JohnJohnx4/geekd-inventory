@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db";
 import type { InventoryItem } from "./types";
+import { useMemo, useState } from "react";
 
 export function useItems() {
   const items = useLiveQuery(
@@ -8,6 +9,41 @@ export function useItems() {
     [],
     [] as InventoryItem[]
   );
+
+  const [category, setCategory] = useState<string>("All");
+  const [itemType, setItemType] = useState<string>("All");
+  const categories = useMemo(() => {
+    const set = new Set(items.map((i) => i.category));
+    return ["All", ...Array.from(set).sort()];
+  }, [items]);
+
+  const itemTypes = useMemo(() => {
+    const set = new Set(items.map((i) => i.itemType));
+    return ["All", "Uncategorized", ...Array.from(set).sort()];
+  }, [items]);
+
+  const visibleItems = useMemo(() => {
+    console.log("items updated?", { category, itemType });
+    return items.filter((i) => {
+      console.log("filtering items?", i);
+      // Category filter
+      if (category !== "All" && i.category !== category) {
+        return false;
+      }
+      console.log("filtering items: category ok");
+
+      // Item type filter
+      if (itemType !== "All") {
+        if (itemType === "Uncategorized") {
+          return i.itemType == null || i.itemType === "";
+        }
+
+        return i.itemType === itemType;
+      }
+
+      return true;
+    });
+  }, [items, category, itemType]);
 
   const updateItem = async (id: string, updates: Partial<InventoryItem>) => {
     await db.items.update(id, {
@@ -78,7 +114,14 @@ export function useItems() {
 
   return {
     items,
+    visibleItems,
+    categories,
+    itemTypes,
+    category,
+    itemType,
     loading: items === undefined,
+    setCategory,
+    setItemType,
     updateItem,
     moveToBar,
     returnToStorage,

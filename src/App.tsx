@@ -24,6 +24,7 @@ import ItemSettingsPage from "./pages/ItemSettingsPage";
 import BarRestockPage from "./pages/BarInventoryPage";
 import OptionsPage from "./pages/OptionsPage";
 import StaircasePrizingCalculator from "./pages/PrizingCalculator";
+import WeakestLinkTracker from "./pages/WeakestLink";
 
 export type AppScreen =
   | "inventory"
@@ -32,6 +33,7 @@ export type AppScreen =
   | "add"
   | "settings"
   | "prizing"
+  | "weakest-link"
   | "options";
 
 export default function App() {
@@ -106,6 +108,7 @@ export default function App() {
         <AddItemPage onBack={() => setScreen("inventory")} />
       )}
       {screen === "prizing" && <StaircasePrizingCalculator />}
+      {screen === "weakest-link" && <WeakestLinkTracker />}
 
       {/* Bottom navigation */}
       <Paper

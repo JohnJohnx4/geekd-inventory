@@ -21,56 +21,23 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import EditIcon from "@mui/icons-material/Edit";
-import FilterIcon from "@mui/icons-material/FilterList";
-import FilterOffIcon from "@mui/icons-material/FilterListOff";
 
 import { useItems } from "../lib/useItems";
 import type { InventoryItem } from "../lib/types";
 import BasicSpeedDial from "./SpeedDial";
+import FilterItems from "../components/FilterItems";
 
 interface Props {
   onEditItem?: (item: InventoryItem) => void;
 }
 
 export default function InventoryPage({ onEditItem }: Props) {
-  const { items, loading, clearDatabase, updateItemTypeBulk } = useItems();
+  const { items, visibleItems, loading, clearDatabase, updateItemTypeBulk } =
+    useItems();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const [category, setCategory] = useState<string>("All");
-  const [itemType, setItemType] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkType, setBulkType] = useState<string>("");
-
-  const categories = useMemo(() => {
-    const set = new Set(items.map((i) => i.category));
-    return ["All", ...Array.from(set).sort()];
-  }, [items]);
-
-  const itemTypes = useMemo(() => {
-    const set = new Set(items.map((i) => i.itemType));
-    return ["All", "Uncategorized", ...Array.from(set).sort()];
-  }, [items]);
-
-  const visibleItems = useMemo(() => {
-    return items.filter((i) => {
-      // Category filter
-      if (category !== "All" && i.category !== category) {
-        return false;
-      }
-
-      // Item type filter
-      if (itemType !== "All") {
-        if (itemType === "Uncategorized") {
-          return i.itemType == null || i.itemType === "";
-        }
-
-        return i.itemType === itemType;
-      }
-
-      return true;
-    });
-  }, [items, category, itemType]);
 
   const summary = useMemo(() => {
     const total = items.length;
@@ -114,51 +81,7 @@ export default function InventoryPage({ onEditItem }: Props) {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ py: 1 }}>
-        <IconButton onClick={() => setShowFilters(!showFilters)}>
-          {showFilters ? <FilterOffIcon /> : <FilterIcon />}
-        </IconButton>
-        {showFilters && (
-          <>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ overflowX: "auto", pb: 1 }}
-            >
-              {categories.map((cat) => (
-                <Chip
-                  key={cat}
-                  label={cat}
-                  clickable
-                  color={category === cat ? "primary" : "default"}
-                  variant={category === cat ? "filled" : "outlined"}
-                  onClick={() => setCategory(cat)}
-                  sx={{ flexShrink: 0 }}
-                />
-              ))}
-            </Stack>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ overflowX: "auto", pb: 1 }}
-            >
-              {itemTypes
-                .filter((i) => !!i)
-                .map((iType, i) => (
-                  <Chip
-                    key={iType + "keys" + i}
-                    label={iType}
-                    clickable
-                    color={itemType === iType ? "primary" : "default"}
-                    variant={itemType === iType ? "filled" : "outlined"}
-                    onClick={() => setItemType(`${iType}`)}
-                    sx={{ flexShrink: 0 }}
-                  />
-                ))}
-            </Stack>
-          </>
-        )}
-      </Container>
+      <FilterItems />
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
         {/* Summary */}
