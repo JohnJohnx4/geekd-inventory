@@ -123,6 +123,7 @@ export default function WeakestLinkTracker() {
     <div className="grid md:grid-cols-2 gap-4">
       <TeamTracker name="Team A" />
       <TeamTracker name="Team B" />
+      <TeamTracker name="FINAL ROUND" />
     </div>
   );
 }
