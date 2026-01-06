@@ -21,20 +21,26 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import EditIcon from "@mui/icons-material/Edit";
+import FilterIcon from "@mui/icons-material/FilterList";
+import FilterOffIcon from "@mui/icons-material/FilterListOff";
 
 import { useItems } from "../lib/useItems";
 import type { InventoryItem } from "../lib/types";
+import BasicSpeedDial from "./SpeedDial";
 
 interface Props {
   onEditItem?: (item: InventoryItem) => void;
 }
 
 export default function InventoryPage({ onEditItem }: Props) {
-  const { items, loading, clearDatabase } = useItems();
+  const { items, loading, clearDatabase, updateItemTypeBulk } = useItems();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [category, setCategory] = useState<string>("All");
   const [itemType, setItemType] = useState<string>("All");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkType, setBulkType] = useState<string>("");
 
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
@@ -68,14 +74,14 @@ export default function InventoryPage({ onEditItem }: Props) {
 
   const summary = useMemo(() => {
     const total = items.length;
-    const noBarStock = items.filter(
-      (i) => i.category === "Concessions" && !i.stockAtBar
-    ).length;
-    const lowStorage = items.filter(
-      (i) => i.storageQty <= i.backstockMin
+
+    const lowQuantity = items.filter(
+      (i) => i.storageQty <= i.backstockMin && i.storageQty !== 0
     ).length;
 
-    return { total, noBarStock, lowStorage };
+    const noQuantity = items.filter((i) => i.storageQty === 0).length;
+
+    return { total, lowQuantity, noQuantity };
   }, [items]);
 
   async function handleClearDatabase() {
@@ -88,61 +94,154 @@ export default function InventoryPage({ onEditItem }: Props) {
     }
   }
 
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+    setBulkType("");
+  }
+
+  const handleSetBulkType = (type: string) => {
+    if (selectedIds.size === 0) return;
+    setBulkType(type);
+  };
+
   return (
     <>
       <Container maxWidth="sm" sx={{ py: 1 }}>
-        <Button
-          color="error"
-          variant="contained"
-          onClick={() => setConfirmOpen(true)}
-        >
-          Clear Inventory
-        </Button>
-      </Container>
-      <Container maxWidth="sm" sx={{ py: 1 }}>
-        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {categories.map((cat) => (
-            <Chip
-              key={cat}
-              label={cat}
-              clickable
-              color={category === cat ? "primary" : "default"}
-              variant={category === cat ? "filled" : "outlined"}
-              onClick={() => setCategory(cat)}
-              sx={{ flexShrink: 0 }}
-            />
-          ))}
-        </Stack>
-        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {itemTypes
-            .filter((i) => !!i)
-            .map((iType, i) => (
-              <Chip
-                key={iType + "keys" + i}
-                label={iType}
-                clickable
-                color={itemType === iType ? "primary" : "default"}
-                variant={itemType === iType ? "filled" : "outlined"}
-                onClick={() => setItemType(`${iType}`)}
-                sx={{ flexShrink: 0 }}
-              />
-            ))}
-        </Stack>
+        <IconButton onClick={() => setShowFilters(!showFilters)}>
+          {showFilters ? <FilterOffIcon /> : <FilterIcon />}
+        </IconButton>
+        {showFilters && (
+          <>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ overflowX: "auto", pb: 1 }}
+            >
+              {categories.map((cat) => (
+                <Chip
+                  key={cat}
+                  label={cat}
+                  clickable
+                  color={category === cat ? "primary" : "default"}
+                  variant={category === cat ? "filled" : "outlined"}
+                  onClick={() => setCategory(cat)}
+                  sx={{ flexShrink: 0 }}
+                />
+              ))}
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ overflowX: "auto", pb: 1 }}
+            >
+              {itemTypes
+                .filter((i) => !!i)
+                .map((iType, i) => (
+                  <Chip
+                    key={iType + "keys" + i}
+                    label={iType}
+                    clickable
+                    color={itemType === iType ? "primary" : "default"}
+                    variant={itemType === iType ? "filled" : "outlined"}
+                    onClick={() => setItemType(`${iType}`)}
+                    sx={{ flexShrink: 0 }}
+                  />
+                ))}
+            </Stack>
+          </>
+        )}
       </Container>
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
         {/* Summary */}
         <Stack direction="row" spacing={1} sx={{ mb: 1.5 }} flexWrap="wrap">
-          <Chip label={`${summary.total} items`} />
+          <Chip label={`${summary.total} total items`} />
           <Chip
-            label={`${summary.noBarStock} Not stocked at bar`}
-            color={summary.noBarStock > 0 ? "error" : "default"}
+            label={`${summary.lowQuantity} low quantity`}
+            color={"warning"}
           />
-          <Chip
-            label={`${summary.lowStorage} storage low`}
-            color={summary.lowStorage > 0 ? "error" : "default"}
-          />
+          <Chip label={`${summary.noQuantity} no quantity`} color={"error"} />
         </Stack>
+
+        <Paper
+          elevation={3}
+          sx={{
+            p: 1.25,
+            mb: 1.5,
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <Stack spacing={1}>
+            <Typography fontWeight={700}>
+              {selectedIds.size} selected
+            </Typography>
+
+            <Stack direction="row" spacing={1}>
+              <Chip
+                label="Drink"
+                sx={{
+                  color: selectedIds.size > 0 ? "#000" : "#aaa",
+                }}
+                variant={selectedIds.size > 0 ? "outlined" : "filled"}
+                clickable={selectedIds.size > 0}
+                onClick={() => handleSetBulkType("Drink")}
+              />
+              <Chip
+                label="Food"
+                sx={{
+                  color: selectedIds.size > 0 ? "#000" : "#aaa",
+                }}
+                variant={selectedIds.size > 0 ? "outlined" : "filled"}
+                clickable={selectedIds.size > 0}
+                onClick={() => handleSetBulkType("Food")}
+              />
+              <Chip
+                label="Supply"
+                sx={{
+                  color: selectedIds.size > 0 ? "#000" : "#aaa",
+                }}
+                variant={selectedIds.size > 0 ? "outlined" : "filled"}
+                clickable={selectedIds.size > 0}
+                onClick={() => handleSetBulkType("Supply")}
+              />
+              <Chip
+                label="Clear"
+                sx={{
+                  color: selectedIds.size > 0 ? "#000" : "#aaa",
+                }}
+                variant={selectedIds.size > 0 ? "outlined" : "filled"}
+                onClick={() => handleSetBulkType("")}
+              />
+            </Stack>
+
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                disabled={!bulkType}
+                onClick={async () => {
+                  await updateItemTypeBulk(Array.from(selectedIds), bulkType);
+                  clearSelection();
+                }}
+              >
+                Apply
+              </Button>
+
+              <Button disabled={!bulkType} onClick={clearSelection}>
+                Cancel
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
 
         {loading ? (
           <Typography color="text.secondary">Loading…</Typography>
@@ -156,7 +255,20 @@ export default function InventoryPage({ onEditItem }: Props) {
               const storageLow = item.storageQty <= item.backstockMin;
 
               return (
-                <Paper key={item.id} variant="outlined" sx={{ p: 1.5 }}>
+                <Paper
+                  key={item.id}
+                  variant="outlined"
+                  sx={{
+                    p: 1.5,
+                    borderColor: selectedIds.has(item.id)
+                      ? "primary.main"
+                      : undefined,
+                    bgcolor: selectedIds.has(item.id)
+                      ? "action.selected"
+                      : undefined,
+                  }}
+                  onClick={() => toggleSelected(item.id)}
+                >
                   <Stack spacing={1}>
                     {/* Header */}
                     <Stack
@@ -172,11 +284,11 @@ export default function InventoryPage({ onEditItem }: Props) {
                           {item.name}
                         </Typography>
 
-                        <Chip label={item.category} />
+                        {item.category && (
+                          <Chip label={item.category} sx={{ mr: 1 }} />
+                        )}
 
-                        <Typography variant="caption" color="text.secondary">
-                          {item.itemType}
-                        </Typography>
+                        {item.itemType && <Chip label={item.itemType} />}
                       </Box>
 
                       {/* Bar status */}
@@ -237,6 +349,9 @@ export default function InventoryPage({ onEditItem }: Props) {
             </Button>
           </DialogActions>
         </Dialog>
+        <div style={{ position: "fixed", bottom: 80, right: 16 }}>
+          <BasicSpeedDial handleDelete={() => setConfirmOpen(true)} />
+        </div>
       </Container>
     </>
   );

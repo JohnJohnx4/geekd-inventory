@@ -65,6 +65,17 @@ export function useItems() {
     await db.items.clear();
   };
 
+  const updateItemTypeBulk = async (ids: string[], itemType: string) => {
+    await db.transaction("rw", db.items, async () => {
+      for (const id of ids) {
+        await db.items.update(id, {
+          itemType,
+          updatedAt: Date.now(),
+        });
+      }
+    });
+  };
+
   return {
     items,
     loading: items === undefined,
@@ -75,5 +86,6 @@ export function useItems() {
     removeFromBar,
     removeFromStorage,
     clearDatabase,
+    updateItemTypeBulk,
   };
 }
