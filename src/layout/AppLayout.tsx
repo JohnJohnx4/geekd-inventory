@@ -18,6 +18,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import PrizingIcon from "@mui/icons-material/EmojiEvents";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import MoneyIcon from "@mui/icons-material/Money";
 
 export default function AppLayout() {
   const navigate = useNavigate();
@@ -81,6 +82,12 @@ export default function AppLayout() {
                   <WeakestLinkIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Weakest Link</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigation("/cash-calculator")}>
+                <ListItemIcon>
+                  <MoneyIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Cash Calculator</ListItemText>
               </MenuItem>
               <MenuItem onClick={() => handleNavigation("/prizing")}>
                 <ListItemIcon>

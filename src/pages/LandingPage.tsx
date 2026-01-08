@@ -23,12 +23,20 @@ const LandingPage = () => {
           variant="contained"
           sx={{ p: 2 }}
           type="href"
-          href="/weakest-link"
+          href="/cash-calculator"
         >
-          Weakest Link
+          Cashout / Deposit Calculator
         </Button>
         <Button variant="contained" sx={{ p: 2 }} type="href" href="/prizing">
           Prizing Calculator
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ p: 2 }}
+          type="href"
+          href="/weakest-link"
+        >
+          Weakest Link
         </Button>
       </Stack>
     </Container>

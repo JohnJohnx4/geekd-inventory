@@ -15,6 +15,7 @@ import StaircasePrizingCalculator from "./pages/PrizingCalculator";
 import WeakestLinkTracker from "./pages/WeakestLink";
 import LandingPage from "./pages/LandingPage";
 import InventoryLayout from "./layout/InventoryLayout";
+import CashCalculator from "./pages/CashCalculator";
 
 // --------------------
 // Root layout
@@ -86,6 +87,12 @@ const weakestLinkRoute = createRoute({
   component: WeakestLinkTracker,
 });
 
+const cashCalculatorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cash-calculator",
+  component: CashCalculator,
+});
+
 // --------------------
 // Route tree
 // --------------------
@@ -99,6 +106,7 @@ const routeTree = rootRoute.addChildren([
   weakestLinkRoute,
   barLayoutRoute,
   inventoryRoute,
+  cashCalculatorRoute,
 ]);
 
 export const router = createRouter({ routeTree });

@@ -9,7 +9,6 @@ import {
 import InventoryIcon from "@mui/icons-material/Inventory2";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import BarIcon from "@mui/icons-material/LocalDrink";
-import MenuIcon from "@mui/icons-material/Menu";
 
 export default function InventoryLayout() {
   const navigate = useNavigate();
@@ -61,15 +60,6 @@ export default function InventoryLayout() {
             icon={
               <InventoryIcon
                 color={navValue === "overview" ? "secondary" : "inherit"}
-              />
-            }
-          />
-          <BottomNavigationAction
-            label="Other"
-            value="inventory/options"
-            icon={
-              <MenuIcon
-                color={navValue === "options" ? "secondary" : "inherit"}
               />
             }
           />
