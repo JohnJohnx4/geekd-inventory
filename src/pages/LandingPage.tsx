@@ -1,6 +1,9 @@
 import { Button, Container, Paper, Stack, Typography } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <Container>
       <Paper sx={{ p: 2, mt: 4 }}>
@@ -14,27 +17,28 @@ const LandingPage = () => {
         <Button
           variant="contained"
           sx={{ p: 2 }}
-          type="href"
-          href="/inventory/bar"
+          onClick={() => navigate({ to: "/inventory/bar" })}
         >
           Inventory Management
         </Button>
         <Button
           variant="contained"
           sx={{ p: 2 }}
-          type="href"
-          href="/cash-calculator"
+          onClick={() => navigate({ to: "/cash-calculator" })}
         >
           Cashout / Deposit Calculator
         </Button>
-        <Button variant="contained" sx={{ p: 2 }} type="href" href="/prizing">
+        <Button
+          variant="contained"
+          sx={{ p: 2 }}
+          onClick={() => navigate({ to: "/prizing" })}
+        >
           Prizing Calculator
         </Button>
         <Button
           variant="contained"
           sx={{ p: 2 }}
-          type="href"
-          href="/weakest-link"
+          onClick={() => navigate({ to: "/weakest-link" })}
         >
           Weakest Link
         </Button>
