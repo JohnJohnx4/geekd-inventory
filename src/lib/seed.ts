@@ -4,6 +4,7 @@ import { seedRows } from "./seedData";
 
 export async function seedIfEmpty() {
   const count = await db.items.count();
+  console.log("Seed check, item count:", count);
   if (count > 0) return;
 
   const now = Date.now();

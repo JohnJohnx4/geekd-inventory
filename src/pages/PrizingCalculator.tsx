@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Card,
@@ -8,7 +8,18 @@ import {
   Stack,
   Divider,
   Chip,
+  IconButton,
+  OutlinedInput,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Button,
 } from "@mui/material";
+
+import ControlPointIcon from "@mui/icons-material/ControlPoint";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDropDown";
 
 /**
  * Staircase prizing logic
@@ -38,17 +49,96 @@ function calculateStaircasePrizing(
 }
 
 export default function StaircasePrizingCalculator() {
-  const [players, setPlayers] = useState(16);
-  const [topCut, setTopCut] = useState(4);
-  const [creditPerPack, setCreditPerPack] = useState(4);
+  const [players, setPlayers] = useState("16");
+  const [topCut, setTopCut] = useState("4");
+  const [creditPerPack, setCreditPerPack] = useState("4");
+
+  const playersNum = Number(players) || 0;
+  const topCutNum = Number(topCut) || 0;
+  const creditNum = Number(creditPerPack) || 0;
 
   const prizes = useMemo(
-    () => calculateStaircasePrizing(players, topCut),
-    [players, topCut]
+    () => calculateStaircasePrizing(playersNum, topCutNum),
+    [playersNum, topCutNum]
   );
 
-  const totalPacks = players * 2;
-  const totalCredit = totalPacks * creditPerPack;
+  const basePrizes = useMemo(
+    () => calculateStaircasePrizing(playersNum, topCutNum),
+    [playersNum, topCutNum]
+  );
+
+  const [editablePrizes, setEditablePrizes] = useState<number[]>(basePrizes);
+
+  const totalPacks = playersNum * 2;
+  const totalCredit = totalPacks * creditNum;
+
+  const handleIncrement = (target: string) => {
+    if (target === "players") {
+      setPlayers((prev) => {
+        const num = Number(prev);
+        return num < 0 ? "0" : String(num + 1);
+      });
+    } else if (target === "topCut") {
+      setTopCut((prev) => {
+        const num = Number(prev);
+        return num < 0 ? "0" : String(num + 1);
+      });
+    } else if (target === "creditPerPack") {
+      setCreditPerPack((prev) => {
+        const num = Number(prev);
+        return num < 0 ? "0" : String(num + 1);
+      });
+    }
+  };
+
+  const handleDecrement = (target: string) => {
+    if (target === "players") {
+      setPlayers((prev) => {
+        const num = Number(prev);
+        return num <= 1 ? "1" : String(num - 1);
+      });
+    } else if (target === "topCut") {
+      setTopCut((prev) => {
+        const num = Number(prev);
+        return num <= 1 ? "1" : String(num - 1);
+      });
+    } else if (target === "creditPerPack") {
+      setCreditPerPack((prev) => {
+        const num = Number(prev);
+        return num <= 0 ? "0" : String(num - 1);
+      });
+    }
+  };
+
+  const movePackUp = (index: number) => {
+    if (index === 0) return;
+
+    setEditablePrizes((prev) => {
+      if (prev[index] <= 0) return prev;
+
+      const next = [...prev];
+      next[index] -= 1;
+      next[index - 1] += 1;
+      return next;
+    });
+  };
+
+  const movePackDown = (index: number) => {
+    if (index === editablePrizes.length - 1) return;
+
+    setEditablePrizes((prev) => {
+      if (prev[index] <= 0) return prev;
+
+      const next = [...prev];
+      next[index] -= 1;
+      next[index + 1] += 1;
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    setEditablePrizes(basePrizes);
+  }, [basePrizes]);
 
   return (
     <Card
@@ -62,93 +152,163 @@ export default function StaircasePrizingCalculator() {
         <Typography variant="h6" textAlign="center" gutterBottom>
           Tournament Prizing
         </Typography>
-
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
-          <TextField
-            label="Players"
-            type="number"
-            value={players}
-            inputProps={{ min: 1 }}
-            onChange={(e) => setPlayers(Number(e.target.value))}
-            fullWidth
-          />
+          <Stack direction={"row"}>
+            <IconButton onClick={() => handleDecrement("players")}>
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+            <TextField
+              label="Players"
+              type="number"
+              value={players}
+              onChange={(e) => setPlayers(e.target.value)}
+              onBlur={() => {
+                if (Number(players) < 0) setPlayers("0");
+              }}
+              fullWidth
+            />
+            <IconButton onClick={() => handleIncrement("players")}>
+              <ControlPointIcon />
+            </IconButton>
+          </Stack>
 
-          <TextField
-            label="Top Cut"
-            type="number"
-            value={topCut}
-            inputProps={{ min: 1 }}
-            onChange={(e) => setTopCut(Number(e.target.value))}
-            fullWidth
-          />
+          <Stack direction={"row"}>
+            <IconButton onClick={() => handleDecrement("topCut")}>
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+            <TextField
+              label="Top Cut"
+              type="number"
+              value={topCut}
+              onChange={(e) => setTopCut(e.target.value)}
+              onBlur={() => {
+                if (Number(players) < 0) setPlayers("0");
+              }}
+              fullWidth
+            />
+            <IconButton onClick={() => handleIncrement("topCut")}>
+              <ControlPointIcon />
+            </IconButton>
+          </Stack>
         </Stack>
-
-        <TextField
-          label="Store Credit per Pack ($)"
-          type="number"
-          value={creditPerPack}
-          inputProps={{ min: 0 }}
-          onChange={(e) => setCreditPerPack(Number(e.target.value))}
-          fullWidth
-          sx={{ mb: 2 }}
-        />
-
+        <Stack direction={"row"}>
+          <IconButton onClick={() => handleDecrement("creditPerPack")}>
+            <RemoveCircleOutlineIcon />
+          </IconButton>
+          <FormControl fullWidth>
+            <InputLabel htmlFor="outlined-adornment-amount">
+              Credit per Pack Rate
+            </InputLabel>
+            <OutlinedInput
+              type="number"
+              value={creditPerPack}
+              onChange={(e) => setCreditPerPack(e.target.value)}
+              fullWidth
+              id="outlined-adornment-amount"
+              label="Credit per Pack Rate"
+              onBlur={() => {
+                if (Number(players) < 0) setPlayers("0");
+              }}
+              sx={{ mb: 2 }}
+              startAdornment={
+                <InputAdornment position="start">$</InputAdornment>
+              }
+            />
+          </FormControl>
+          <IconButton onClick={() => handleIncrement("creditPerPack")}>
+            <ControlPointIcon />
+          </IconButton>
+        </Stack>
         <Divider sx={{ mb: 2 }} />
-
-        <Stack spacing={1}>
+        <Stack spacing={1} mt={1}>
+          <Typography variant="caption">
+            Use arrows to redistribute packs if allotments are unbalanced
+          </Typography>
           {prizes.length === 0 ? (
             <Typography color="error" textAlign="center" variant="body2">
               Not enough packs to support this top cut.
             </Typography>
           ) : (
-            prizes.map((packs, index) => {
-              const credit = packs * creditPerPack;
+            editablePrizes.map((packs, index) => {
+              const credit = packs * Number(creditPerPack);
 
               return (
                 <Box
-                  key={index}
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     p: 1.25,
+                    width: "100%",
                     borderRadius: 2,
-                    bgcolor:
-                      index === 0
-                        ? "success.light"
-                        : index === 1
-                        ? "info.light"
-                        : "grey.100",
+                    bgcolor: index === 0 ? "info.light" : "primary.light",
                   }}
                 >
-                  <Typography variant="body2">
-                    {index + 1}
-                    {index === 0
-                      ? "st"
-                      : index === 1
-                      ? "nd"
-                      : index === 2
-                      ? "rd"
-                      : "th"}
-                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="body2" sx={{ color: "white" }}>
+                      {index + 1}
+                      {index === 0
+                        ? "st"
+                        : index === 1
+                        ? "nd"
+                        : index === 2
+                        ? "rd"
+                        : "th"}
+                    </Typography>
 
-                  <Stack direction="row" spacing={1}>
-                    <Chip
-                      label={`${packs} packs`}
-                      size="small"
-                      color={index === 0 ? "success" : "default"}
-                    />
-                    <Chip
-                      label={`$${credit}`}
-                      size="small"
-                      variant="outlined"
-                    />
+                    <Stack direction="row" spacing={1}>
+                      <Chip
+                        label={`${packs} packs`}
+                        size="small"
+                        color={index === 0 ? "primary" : "info"}
+                        sx={{ color: "white" }}
+                      />
+                      <Chip
+                        label={`$${credit}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ color: "white" }}
+                      />
+                    </Stack>
+                  </Stack>
+                  <Stack direction="row">
+                    {index !== 0 && (
+                      <IconButton
+                        size="small"
+                        sx={{ color: "white" }}
+                        onClick={() => movePackUp(index)}
+                      >
+                        <ArrowUpwardIcon />
+                      </IconButton>
+                    )}
+                    {index < editablePrizes.length - 1 && (
+                      <IconButton
+                        size="small"
+                        sx={{ color: "white" }}
+                        onClick={() => movePackDown(index)}
+                        disabled={index === editablePrizes.length - 1}
+                      >
+                        <ArrowDownwardIcon />
+                      </IconButton>
+                    )}
                   </Stack>
                 </Box>
               );
             })
           )}
         </Stack>
+
+        <Box my={2}>
+          <Button
+            disabled={editablePrizes === basePrizes}
+            fullWidth
+            variant="contained"
+            color="error"
+            onClick={() => setEditablePrizes(basePrizes)}
+          >
+            Reset Manual Distributions
+          </Button>
+        </Box>
 
         <Divider sx={{ my: 2 }} />
 

@@ -25,6 +25,7 @@ export type InventoryItem = {
   // NEW (optional) so we keep your sheet data
   fridgeSpace?: number; // capacity / facing count
   stockAtBar?: boolean; // TRUE/FALSE from your sheet
+  stockStatus?: "Full" | "Moderate" | "Low" | "Out";
   expiration?: string; // keep as string for now
   storageLocation?: string; // e.g. "115"
   notes?: string;

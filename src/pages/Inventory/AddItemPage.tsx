@@ -19,8 +19,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { nanoid } from "nanoid";
 import styled from "styled-components";
 
-import type { Category, InventoryItem } from "../lib/types";
-import { db } from "../lib/db";
+import type { Category, InventoryItem } from "../../lib/types";
+import { db } from "../../lib/db";
 
 const PageCard = styled(Paper)`
   padding: 16px;

@@ -865,7 +865,7 @@ export const seedRows = [
   },
   {
     id: "counterfeit-pens",
-    name: "Counterfiet Pens",
+    name: "Counterfeit Pens",
     category: "Work Supplies",
     barQty: 0,
     storageQty: 0,

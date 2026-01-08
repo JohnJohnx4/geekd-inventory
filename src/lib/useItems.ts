@@ -12,6 +12,9 @@ export function useItems() {
 
   const [category, setCategory] = useState<string>("All");
   const [itemType, setItemType] = useState<string>("All");
+  const [stockStatus, setStockStatus] = useState<
+    "All" | "Full" | "Moderate" | "Low" | "Out"
+  >("All");
   const categories = useMemo(() => {
     const set = new Set(items.map((i) => i.category));
     return ["All", ...Array.from(set).sort()];
@@ -23,16 +26,11 @@ export function useItems() {
   }, [items]);
 
   const visibleItems = useMemo(() => {
-    console.log("items updated?", { category, itemType });
     return items.filter((i) => {
-      console.log("filtering items?", i);
-      // Category filter
       if (category !== "All" && i.category !== category) {
         return false;
       }
-      console.log("filtering items: category ok");
 
-      // Item type filter
       if (itemType !== "All") {
         if (itemType === "Uncategorized") {
           return i.itemType == null || i.itemType === "";
@@ -41,9 +39,16 @@ export function useItems() {
         return i.itemType === itemType;
       }
 
+      if (stockStatus !== "All" && i.stockStatus !== stockStatus) {
+        if (stockStatus === "Out" && !i.stockStatus) {
+          return true;
+        }
+        return false;
+      }
+
       return true;
     });
-  }, [items, category, itemType]);
+  }, [items, category, itemType, stockStatus]);
 
   const updateItem = async (id: string, updates: Partial<InventoryItem>) => {
     await db.items.update(id, {
@@ -65,6 +70,16 @@ export function useItems() {
   const setStockedAtBar = async (item: InventoryItem, stocked: boolean) => {
     await db.items.update(item.id, {
       stockAtBar: stocked,
+      updatedAt: Date.now(),
+    });
+  };
+
+  const setStockedStatus = async (
+    item: InventoryItem,
+    status: "Full" | "Moderate" | "Low" | "Out"
+  ) => {
+    await db.items.update(item.id, {
+      stockStatus: status,
       updatedAt: Date.now(),
     });
   };
@@ -112,6 +127,11 @@ export function useItems() {
     });
   };
 
+  const getItemById = async (id: string) => {
+    const item = await db.items.get(id);
+    return item;
+  };
+
   return {
     items,
     visibleItems,
@@ -119,16 +139,20 @@ export function useItems() {
     itemTypes,
     category,
     itemType,
+    stockStatus,
     loading: items === undefined,
     setCategory,
     setItemType,
+    setStockStatus,
     updateItem,
     moveToBar,
     returnToStorage,
     setStockedAtBar,
+    setStockedStatus,
     removeFromBar,
     removeFromStorage,
     clearDatabase,
     updateItemTypeBulk,
+    getItemById,
   };
 }

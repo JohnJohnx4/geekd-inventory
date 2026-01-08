@@ -11,19 +11,29 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { db } from "../lib/db";
-import type { InventoryItem, Category } from "../lib/types";
+import { db } from "../../lib/db";
+import type { InventoryItem, Category } from "../../lib/types";
+import { useNavigate } from "@tanstack/react-router";
+import { inventorySettingsRoute } from "../../Router";
+import { useItems } from "../../lib/useItems";
 
 const categories: Category[] = ["Concessions", "Cleaning", "Work Supplies"];
 
-export default function ItemSettingsPage({
-  item,
-  onBack,
-}: {
-  item: InventoryItem;
-  onBack: () => void;
-}) {
-  const [form, setForm] = useState<InventoryItem>({ ...item });
+export default function ItemSettingsPage() {
+  const navigate = useNavigate();
+  const { itemID } = inventorySettingsRoute.useParams();
+  const { getItemById } = useItems();
+  const [item, setItem] = useState<InventoryItem | null>(null);
+
+  // const itemID
+  const [form, setForm] = useState<InventoryItem>(
+    item
+      ? { ...item }
+      : ({
+          name: "",
+          barMin: 0,
+        } as InventoryItem)
+  );
   const [saving, setSaving] = useState(false);
 
   // Derived item types
@@ -43,6 +53,15 @@ export default function ItemSettingsPage({
 
       setItemTypes(types);
     });
+
+    const fetchItem = async () => {
+      const fetchedItem = await getItemById(itemID);
+      if (fetchedItem) {
+        setItem(fetchedItem);
+        setForm(fetchedItem);
+      }
+    };
+    void fetchItem();
   }, []);
 
   function update<K extends keyof InventoryItem>(
@@ -58,6 +77,7 @@ export default function ItemSettingsPage({
   }
 
   async function save() {
+    if (!item) return;
     setSaving(true);
 
     const normalized = {
@@ -71,7 +91,7 @@ export default function ItemSettingsPage({
 
     await db.items.update(item.id, normalized);
     setSaving(false);
-    onBack();
+    navigate({ to: "/inventory/overview" });
   }
 
   function addItemType() {
@@ -86,6 +106,14 @@ export default function ItemSettingsPage({
     update("itemType", trimmed);
     setNewType("");
     setAddingType(false);
+  }
+
+  if (!item) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 2 }}>
+        <Typography variant="h6">Item not found.</Typography>
+      </Container>
+    );
   }
 
   return (

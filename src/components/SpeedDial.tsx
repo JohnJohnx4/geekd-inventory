@@ -5,8 +5,13 @@ import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import DeleteIcon from "@mui/icons-material/Delete";
+import StorageIcon from "@mui/icons-material/Storage";
+import { seedIfEmpty } from "../lib/seed";
 
-const actions = [{ icon: <DeleteIcon />, name: "Delete All" }];
+const actions = [
+  { icon: <DeleteIcon />, name: "Drop DB" },
+  { icon: <StorageIcon />, name: "Seed DB" },
+];
 interface Props {
   handleDelete: () => void;
 }
@@ -16,8 +21,11 @@ export default function InventorySpeedDial({ handleDelete }: Props) {
   const handleClose = () => setOpen(false);
   const handlePress = (actionName: string) => {
     handleClose();
-    if (actionName === "Delete All") {
+    if (actionName === "Drop DB") {
       handleDelete();
+    }
+    if (actionName === "Seed DB") {
+      seedIfEmpty();
     }
   };
 

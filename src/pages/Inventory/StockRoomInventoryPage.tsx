@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
   Typography,
   Container,
@@ -9,9 +8,10 @@ import {
   Divider,
 } from "@mui/material";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../lib/db";
-import type { InventoryItem } from "../lib/types";
+import { db } from "../../lib/db";
+import type { InventoryItem } from "../../lib/types";
+import FilterItems from "../../components/FilterItems";
+import { useItems } from "../../lib/useItems";
 
 function clampInt(n: number) {
   if (!Number.isFinite(n)) return 0;
@@ -19,44 +19,17 @@ function clampInt(n: number) {
 }
 
 export default function StockRoomPage() {
-  const items = useLiveQuery(
-    () => db.items.orderBy("name").toArray(),
-    [],
-    [] as InventoryItem[]
-  );
-
-  const [category, setCategory] = useState<string>("All");
-  const [itemType, setItemType] = useState<string>("All");
-
-  const categories = useMemo(() => {
-    const set = new Set(items.map((i) => i.category));
-    return ["All", ...Array.from(set).sort()];
-  }, [items]);
-
-  const itemTypes = useMemo(() => {
-    const set = new Set(items.map((i) => i.itemType));
-    return ["All", ...Array.from(set).sort()];
-  }, [items]);
-
-  const visibleItems = useMemo(() => {
-    return items.filter((i) => {
-      // Category filter
-      if (category !== "All" && i.category !== category) {
-        return false;
-      }
-
-      // Item type filter
-      if (itemType !== "All") {
-        if (itemType === "Uncategorized") {
-          return i.itemType == null || i.itemType === "";
-        }
-
-        return i.itemType === itemType;
-      }
-
-      return true;
-    });
-  }, [items, category, itemType]);
+  const {
+    visibleItems,
+    categories,
+    itemTypes,
+    category,
+    itemType,
+    stockStatus,
+    setCategory,
+    setStockStatus,
+    setItemType,
+  } = useItems();
 
   async function updateItem(id: string, patch: Partial<InventoryItem>) {
     await db.items.update(id, { ...patch, updatedAt: Date.now() });
@@ -70,36 +43,16 @@ export default function StockRoomPage() {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ py: 1, mt: 2 }}>
-        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {categories.map((cat) => (
-            <Chip
-              key={cat}
-              label={cat}
-              clickable
-              color={category === cat ? "primary" : "default"}
-              variant={category === cat ? "filled" : "outlined"}
-              onClick={() => setCategory(cat)}
-              sx={{ flexShrink: 0 }}
-            />
-          ))}
-        </Stack>
-        <Stack direction="row" spacing={1} sx={{ overflowX: "auto", pb: 1 }}>
-          {itemTypes
-            .filter((i) => !!i)
-            .map((iType, i) => (
-              <Chip
-                key={iType + "keys" + i}
-                label={iType}
-                clickable
-                color={itemType === iType ? "primary" : "default"}
-                variant={itemType === iType ? "filled" : "outlined"}
-                onClick={() => setItemType(`${iType}`)}
-                sx={{ flexShrink: 0 }}
-              />
-            ))}
-        </Stack>
-      </Container>
+      <FilterItems
+        categories={categories}
+        itemTypes={itemTypes}
+        category={category}
+        itemType={itemType}
+        setCategory={setCategory}
+        setItemType={setItemType}
+        stockStatus={stockStatus}
+        setStockStatus={setStockStatus}
+      />
 
       <Container maxWidth="sm" sx={{ py: 2 }}>
         <Stack spacing={1.5}>
